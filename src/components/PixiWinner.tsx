@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Application, Assets, Container, Sprite } from "pixi.js";
+import { Application, Assets, Container, Sprite, Text, TextStyle } from "pixi.js";
 import flame from "@/assets/smokeparticle.png";
 import circle from "@/assets/circle.png";
-import text from "@/assets/text.png";
+import winner from "@/assets/winner.png";
 
 interface FlameParticle {
   sprite: Sprite;
@@ -14,7 +14,7 @@ interface FlameParticle {
   maxLife: number;
 }
 
-export default function PixiFire({ checked } : { checked: boolean }) {
+export default function PixiWinner({ checked } : { checked: boolean }) {
   const pixiRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -114,7 +114,7 @@ export default function PixiFire({ checked } : { checked: boolean }) {
           }
         });
 
-        const textTexture = await Assets.load(text.src);
+        const textTexture = await Assets.load(winner.src);
         const textSprite = new Sprite(textTexture);
         textSprite.anchor.set(0.5);
         textSprite.x = width / 2;
@@ -130,8 +130,8 @@ export default function PixiFire({ checked } : { checked: boolean }) {
   return (
     <div ref={pixiRef} className={`absolute mx-auto w-full h-full ${
       !checked
-      ? "origin-zoom"
-      : "zoom-out-fade"}`
+      ? "origin-hide"
+      : "shrink-to-100-fade-in"}`
     } />
   );
 }

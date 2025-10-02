@@ -1,0 +1,42 @@
+/* 1) Zoom out 100% -> 0%, fade 1 -> 0 */
+@keyframes zoomOutFade {
+  from { transform: scale(1); opacity: 1; }
+  to   { transform: scale(0); opacity: 0; }
+}
+
+/* 2) Zoom out 200% -> 100%, fade 0 -> 1 */
+@keyframes shrinkToNormalFadeIn {
+  from { transform: scale(2); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.origin-zoom {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.origin-hide {
+  opacity: 0;
+  transform: scale(2);
+}
+
+/* Utility classes */
+.zoom-out-fade {
+  animation: zoomOutFade var(--zof-dur, 400ms) var(--zof-ease, ease) both;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+.shrink-to-100-fade-in {
+  animation: shrinkToNormalFadeIn var(--stin-dur, 400ms) var(--stin-ease, ease) both;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+/* Optional: respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .zoom-out-fade,
+  .shrink-to-100-fade-in {
+    animation-duration: 1ms;
+  }
+}

@@ -1,38 +1,60 @@
 "use client";
-import { useState } from "react";
-import Image from "next/image";
-import logo from "@/assets/logo.png";
+import { useEffect, useState } from "react";
 import PixiSlot from "./PixiSlot";
+import PixiFire from "./PixiFire";
+import PixiFlame from "./PixiFlame";
+import PixiWinner from "./PixiWinner";
 
 export default function SlotMachine() {
   const [stopFlags, setStopFlags] = useState([false, false, false, false, false]);
+  const [checked, setChecked] = useState(false);
 
-  const handleBuy = () => {
-    // trigger staggered stopping
-    [0, 1, 2, 3, 4].forEach((idx) => {
-      setTimeout(() => {
-        setStopFlags((prev) => {
-          const copy = [...prev];   // ✅ clone
-          copy[idx] = true;         // mark stop requested
-          // console.log("Updated flags:", copy);
-          return copy;              // ✅ new reference returned
-        });
-      }, idx * 800);
-    });
+  const restart = () => {
+    setStopFlags([false, false, false, false, false]);
+    setChecked(false);
 
     setTimeout(() => {
-      // const count = stopFlags.map(value => value === false ? 1 : 0).reduce((a: number, b: number) => a + b, 0);
-      // if (count === 0) {}
-      setStopFlags([false, false, false, false, false]);
+      handleCheck();
+    }, 10000);
+  }
+
+  const handleCheck = () => {
+    // trigger staggered stopping
+    // [0, 1, 2, 3, 4].forEach((idx) => {
+    //   setTimeout(() => {
+    //     setStopFlags((prev) => {
+    //       const copy = [...prev];   // ✅ clone
+    //       copy[idx] = true;         // mark stop requested
+    //       // console.log("Updated flags:", copy);
+    //       return copy;              // ✅ new reference returned
+    //     });
+    //   }, idx * 800);
+    // });
+
+    setStopFlags([true, true, true, true, true]);
+    setTimeout(() => {
+      setChecked(true);
+    }, 1500);
+
+    setTimeout(() => {
+      restart();
     }, 12000);
   };
+
+  useEffect(() => {
+    restart();
+  }, []);
 
   return (
     <div className="w-sm flex flex-col items-center justify-center bg-black overflow-hidden relative">
       {/* Top Logo */}
       <div className="w-4/5 mt-4 border-0 border-x-4 border-x-yellow-200 rounded bg-gray-900/20">
         <div className="border-y-2 border-y-amber-100/20">
-          <Image className="mx-auto w-auto h-32" src={logo} alt="Logo" />
+          <div className="w-full h-32 bg-black/20 relative overflow-hidden">
+            <PixiFire checked={checked} />
+            <PixiWinner checked={checked} />
+          </div>
+          {/* <Image className="mx-auto w-auto h-32" src={logo} alt="Logo" /> */}
           <p className="text-center text-lg text-orange-300 font-bold scale-y-150 uppercase">
             Last Spin. Last Buy. Big Win.
           </p>
@@ -41,9 +63,8 @@ export default function SlotMachine() {
 
       <div className="w-8/9 mt-3 border-0 border-x-4 border-x-yellow-200 rounded bg-gray-900/20">
         <div className="border-y-4 border-y-amber-100/10 px-2 py-1">
-          {/* Middle Info Section */}
-          <div className="w-full bg-yellow-600 text-center">
-            <h2 className="text-8xl font-extrabold text-shadow-black text-shadow-sm  text-yellow-200">$LAST</h2>
+          <div className="w-full h-20">
+            <PixiFlame />
           </div>
 
           <div className="flex justify-around font-bold text-center uppercase leading-4 divide-x-1 divide-orange-300/30 border-b border-orange-300/30 py-1">
@@ -88,7 +109,6 @@ export default function SlotMachine() {
           </div>
           <button
             className="bg-gradient-to-b from-orange-300 to-orange-400 text-lg font-bold px-5 py-0.3 rounded shadow shadow-orange-300 border-1 border-gray-800/70 hover:from-yellow-300 hover:to-yellow-400"
-            onClick={handleBuy}
           >
             BUY
           </button>

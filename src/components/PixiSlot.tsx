@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Application, Assets, Container, Sprite } from "pixi.js";
 import doge from "@/assets/doge.png";
 import meme from "@/assets/meme.png";
@@ -28,7 +28,8 @@ export default function PixiSlot({ stopping }: { stopping: boolean }) {
       .init({
         width,
         height,
-        backgroundAlpha: 0
+        backgroundAlpha: 0,
+        antialias: true,
       })
       .then(async () => {
         pixiRef.current?.appendChild(app.canvas);
