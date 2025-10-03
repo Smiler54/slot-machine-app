@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@pixi/particle-emitter": "^5.0.8",
+    "@solana/web3.js": "^1.98.4",
     "next": "15.5.4",
     "pixi.js": "^8.13.2",
     "react": "19.1.0",
