@@ -3,10 +3,9 @@ import { useEffect, useState, useRef } from "react";
 import ResultToast from "./ResultToast";
 import LogoSection from "./LogoSection";
 import InfoSection from "./InfoSection";
-import SlotSection from "./SlotSection";
+import PixiSlotMachine from "./SlotSection/PixiSlotMachine";
 import BuySection from "./BuySection";
 import { StateMsg, BuyMsg, SellMsg, WinMsg } from "../utils/types";
-import PixiSlotMachine from "./SlotSection/PixiSlotMachine";
 
 export default function SlotMachine() {
   const [state, setState] = useState<StateMsg["state"] | null>(null);
