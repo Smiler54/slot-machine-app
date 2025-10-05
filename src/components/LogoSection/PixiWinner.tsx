@@ -2,9 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import { Application, Assets, Container, Sprite } from "pixi.js";
-import flame from "@/assets/smokeparticle.png";
-import circle from "@/assets/circle.png";
-import text from "@/assets/text.png";
+import flame from "@/assets/smoke.png";
+import coin from "@/assets/coin.png";
+import winner from "@/assets/winner.png";
 
 interface FlameParticle {
   sprite: Sprite;
@@ -14,7 +14,7 @@ interface FlameParticle {
   maxLife: number;
 }
 
-export default function PixiFire({ checked } : { checked: boolean }) {
+export default function PixiWinner({ checked }: { checked: boolean }) {
   const pixiRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function PixiFire({ checked } : { checked: boolean }) {
     const parent = pixiRef.current;
     const width = parent.clientWidth;
     const height = parent.clientHeight;
-    app
+    const initPromise = app
       .init({
         width,
         height,
@@ -38,7 +38,7 @@ export default function PixiFire({ checked } : { checked: boolean }) {
         // Append the canvas to the div
         pixiRef.current?.appendChild(app.canvas);
 
-        const circleTexture = await Assets.load(circle.src);
+        const circleTexture = await Assets.load(coin.src);
         const circleSprite = new Sprite(circleTexture);
         circleSprite.anchor.set(0.5);
         circleSprite.x = width / 2;
@@ -74,7 +74,7 @@ export default function PixiFire({ checked } : { checked: boolean }) {
             angle,
             speed: 0.6 - Math.random(), // outward drift
             life: 0,
-            maxLife: 10 + Math.random() * 120,
+            maxLife: 10 + Math.random() * 100,
           };
 
           particles.push(p);
@@ -82,7 +82,7 @@ export default function PixiFire({ checked } : { checked: boolean }) {
 
         app.ticker.add(() => {
           // spawn flames
-          for (let i = 0; i < 5; i++) spawnParticle();
+          for (let i = 0; i < 10; i++) spawnParticle();
 
           for (let i = particles.length - 1; i >= 0; i--) {
             const p = particles[i];
@@ -99,7 +99,7 @@ export default function PixiFire({ checked } : { checked: boolean }) {
 
             // fade + shrink
             s.alpha = 1 - t;
-            s.scale.set((1 - t * 0.5) * 0.5);
+            s.scale.set((1 - t * 0.5) * 0.25);
 
             // color shift
             if (t < 0.1) s.tint = 0xcc6600; // yellow
@@ -114,7 +114,7 @@ export default function PixiFire({ checked } : { checked: boolean }) {
           }
         });
 
-        const textTexture = await Assets.load(text.src);
+        const textTexture = await Assets.load(winner.src);
         const textSprite = new Sprite(textTexture);
         textSprite.anchor.set(0.5);
         textSprite.x = width / 2;
@@ -123,15 +123,19 @@ export default function PixiFire({ checked } : { checked: boolean }) {
       });
 
     return () => {
-      app.destroy(true, { children: true });
+      initPromise.then(() => {
+        try {
+          app.ticker.stop();
+          app.destroy(true, { children: true });
+        } catch (err) { };
+      });
     };
   }, []);
 
   return (
-    <div ref={pixiRef} className={`absolute mx-auto w-full h-full ${
-      !checked
-      ? "origin-zoom"
-      : "zoom-out-fade"}`
+    <div ref={pixiRef} className={`absolute mx-auto w-full h-full ${!checked
+        ? "origin-hide"
+        : "shrink-to-100-fade-in"}`
     } />
   );
 }

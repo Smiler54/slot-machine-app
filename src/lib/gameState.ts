@@ -59,7 +59,7 @@ class GameState {
     this._state = {
       creatorWallet: "CREATOR_WALLET_HERE",
       creatorWalletName: "Creator",
-      feesPoolWallet: "FEES_POOL_WALLET",
+      feesPoolWallet: "J32jV4WAkY4yXTTrMTAHzAzl",
       feesPoolUsd: 0,
       marketCapUsd: 0,
       creatorWalletUsd: 0,

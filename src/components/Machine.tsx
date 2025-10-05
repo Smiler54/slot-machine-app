@@ -22,7 +22,7 @@ export default function SlotMachine() {
 
     (async () => {
       await app.init({
-        width: 900,
+        width: 1000,
         height: 500,
         backgroundAlpha: 0,
         antialias: true,
@@ -188,5 +188,5 @@ export default function SlotMachine() {
     };
   }, []);
 
-  return <div ref={rootRef} className="w-full h-[520px] rounded-2xl bg-black/40 border border-white/10 overflow-hidden" />;
+  return <div ref={rootRef} className="w-full h-[500px] rounded-2xl bg-black/40 border border-white/10 overflow-hidden" />;
 }
