@@ -5,6 +5,7 @@ import { Application, Assets, Container, Sprite } from "pixi.js";
 import flame from "@/assets/smoke.png";
 import coin from "@/assets/coin.png";
 import winner from "@/assets/winner.png";
+import { FIRST_COLOR, LAST_COLOR, SECOND_COLOR, THIRD_COLOR } from "@/utils/const";
 
 interface FlameParticle {
   sprite: Sprite;
@@ -102,10 +103,10 @@ export default function PixiWinner({ checked }: { checked: boolean }) {
             s.scale.set((1 - t * 0.5) * 0.25);
 
             // color shift
-            if (t < 0.1) s.tint = 0xcc6600; // yellow
-            else if (t < 0.4) s.tint = 0xff9933; // orange
-            else if (t < 0.7) s.tint = 0xcc3300; // red
-            else s.tint = 0x000000; // smoke
+            if (t < 0.1) s.tint = FIRST_COLOR;
+            else if (t < 0.4) s.tint = SECOND_COLOR;
+            else if (t < 0.7) s.tint = THIRD_COLOR;
+            else s.tint = LAST_COLOR;
 
             if (p.life >= p.maxLife) {
               fireContainer.removeChild(s);

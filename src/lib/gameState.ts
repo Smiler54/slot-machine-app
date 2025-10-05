@@ -1,4 +1,5 @@
 // lib/gameState.ts
+import { BUY_FEE_CREATOR, BUY_FEE_POOL, BUY_TIMEOUT, SELL_TIMEOUT, WIN_CHECK_TIME } from "@/utils/const";
 import { bus } from "./bus";
 
 export type BuyEvent = {
@@ -44,7 +45,7 @@ export type PublicState = {
 
 function adaptiveJackpotIntervalMs(marketCapUsd: number) {
   // Base 30 min, scale up with market cap to make jackpots rarer as MC grows.
-  const base = 30 * 60_000; // 30 min
+  const base = WIN_CHECK_TIME; // 30 min
   // Simple curve: +1 minute per $10k MC, capped at +120 min
   const extra = Math.min(120, Math.floor(marketCapUsd / 10_000)) * 60_000;
   return base + extra;
@@ -76,9 +77,9 @@ class GameState {
   /** Call when a buy happens */
   recordBuy(ev: BuyEvent) {
     // Update tracked numbers (these are approximations for UI; plug real values later)
-    this._state.feesPoolUsd += ev.amountUsd * 0.01; // EXAMPLE: 1% of buys shown as “fees pool” growth (tune/remove)
-    this._state.marketCapUsd += ev.amountUsd * 3;   // EXAMPLE: crude demo effect for UI pop (replace with real MC)
-    this._state.creatorWalletUsd += ev.amountUsd * 0.02; // EXAMPLE: creator fee visualization (replace with real)
+    this._state.feesPoolUsd += ev.amountUsd * BUY_FEE_POOL;
+    this._state.creatorWalletUsd += ev.amountUsd * BUY_FEE_CREATOR;
+    this._state.marketCapUsd += ev.amountUsd - (ev.amountUsd * (BUY_FEE_POOL + BUY_FEE_CREATOR));
     this._state.lastBuyer = {
       wallet: ev.buyer,
       name: ev.buyerName,
@@ -143,7 +144,12 @@ export const gameState = new GameState();
 
 /** MOCK MODE: generate random buys/sells so you can see the app move */
 if (process.env.USE_MOCK === "1") {
-  const rndWallet = () => `WALLET_${Math.random().toString(36).slice(2, 8)}`;
+  const rndWallet = () => {
+    let randString = Math.random().toString(36).slice(2);
+    return randString.slice(0, 6);
+  };
+  
+  // Every BUY_TIMEOUT ms, generate a random buy
   setInterval(() => {
     gameState.recordBuy({
       type: "buy",
@@ -151,13 +157,14 @@ if (process.env.USE_MOCK === "1") {
       buyerName: "buyer",
       amountUsd: Math.round((Math.random() * 40 + 10) * 100) / 100,
     });
-  }, 12_000);
+  }, BUY_TIMEOUT);
 
+  // Every SELL_TIMEOUT ms, generate a random sell
   setInterval(() => {
     gameState.recordSell({
       type: "sell",
       seller: rndWallet(),
       amountUsd: Math.round((Math.random() * 50 + 5) * 100) / 100,
     });
-  }, 35_000);
+  }, SELL_TIMEOUT);
 }

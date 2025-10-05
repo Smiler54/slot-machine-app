@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Application, Assets, Container, Text, TextStyle, Sprite, BlurFilter } from "pixi.js";
 import flame from "@/assets/smoke.png";
+import { FIRST_COLOR, LAST_COLOR, SECOND_COLOR, THIRD_COLOR } from "@/utils/const";
 
 interface FlameParticle {
   sprite: Sprite;
@@ -80,10 +81,10 @@ export default function PixiTokenFire() {
 
           const t = p.life / p.maxLife;
           p.sprite.scale.set(1 - t * 0.5);
-          if (t < 0.1) p.sprite.tint = 0xffcc33;
-          else if (t < 0.4) p.sprite.tint = 0xff9933;
-          else if (t < 0.7) p.sprite.tint = 0xff6600;
-          else p.sprite.tint = 0xcc3300;
+          if (t < 0.1) p.sprite.tint = FIRST_COLOR;
+          else if (t < 0.4) p.sprite.tint = SECOND_COLOR;
+          else if (t < 0.7) p.sprite.tint = THIRD_COLOR;
+          else p.sprite.tint = LAST_COLOR;
 
           if (p.life >= p.maxLife) {
             fireContainer.removeChild(p.sprite);
@@ -133,7 +134,7 @@ export default function PixiTokenFire() {
       const maxStrength = 8;
       const minAlpha = 0.15;
       const maxAlpha = 0.85;
-      const pulseSpeed = 0.00025;
+      const pulseSpeed = 0.0002;
 
       app.ticker.add((ticker) => {
         tAccum += ticker.deltaMS * pulseSpeed;
