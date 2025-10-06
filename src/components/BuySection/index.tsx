@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StateMsg } from "../../utils/types";
 import { formatCurrency } from "@/utils/utils";
 import { MAX_BUY_AMOUNT, MIN_BUY_AMOUNT, NEXT_BUY_DELAY, WIN_CHECK_DELAY, WIN_CHECK_TIME } from "@/utils/const";
@@ -95,6 +95,8 @@ export default function BuySection({ state }: { state?: StateMsg["state"] | null
     setSecs(Math.floor((timeLeft % 60000) / 1000));
   }, [state.nextJackpotAt]);
 
+  const feesFormatted = useMemo(() => formatCurrency(state?.feesPoolUsd), [state?.feesPoolUsd]);
+
   return (
     <div className="text-sm w-full flex-col pt-2">
       {/* Bottom Info */}
@@ -105,7 +107,7 @@ export default function BuySection({ state }: { state?: StateMsg["state"] | null
         </div>
         <div className="w-3/5 flex flex-col justify-center items-center">
           <p className="text-yellow-500 font-bold uppercase">Fees Pool:</p>
-          <p className="text-yellow-500 font-bold text-3xl">${formatCurrency(state?.marketCapUsd)}</p>
+          <p className="text-yellow-500 font-bold text-3xl">${feesFormatted}</p>
         </div>
       </div>
       <div className="flex justify-between items-center gap-1">

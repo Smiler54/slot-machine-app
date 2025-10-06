@@ -1,9 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
-import PixiLogoFire from "./PixiLogoFire";
-import PixiWinner from "./PixiWinner";
+import dynamic from "next/dynamic";
+const PixiLogoFire = dynamic(() => import("./PixiLogoFire"), { ssr: false });
+const PixiWinner = dynamic(() => import("./PixiWinner"), { ssr: false });
 
-export default function LogoSection({ alert }: { alert?: string | null }) {
+import { memo } from "react";
+
+function LogoSectionImpl({ alert }: { alert?: string | null }) {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
@@ -27,4 +30,7 @@ export default function LogoSection({ alert }: { alert?: string | null }) {
       </div>
     </div>
   );
-};
+}
+
+const LogoSection = memo(LogoSectionImpl);
+export default LogoSection;

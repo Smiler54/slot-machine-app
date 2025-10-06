@@ -33,10 +33,17 @@ export const THIRD_COLOR = 0xff6600;
 export const LAST_COLOR = 0xcc3300;
 
 // === Rewards & Payouts (for backend use) ===
-export const BUY_FEE_POOL = 0.01;
-export const BUY_FEE_CREATOR = 0.02;
+export const CREATOR_PAYOUT_PERCENT = 0.02;
+export const WINNER_PAYOUT_PERCENT = 0.5;
 
 // === Backend / Networking ===
 export const STREAM_URL = process.env.NEXT_PUBLIC_STREAM_URL || "/api/stream";
 export const PUMP_FUN_API_URL = "https://pump.fun/api"; // optional API integration
 export const CREATOR_WALLET = "CREATOR_WALLET_ADDRESS_HERE"; // replace dynamically
+
+// === Network / Program ===
+export const STREAM_PROGRAM_ID = process.env.NEXT_PUBLIC_PROGRAM_ID || "11111111111111111111111111111111"; // <-- replace with real program
+export const SOLANA_RPC_HTTP = process.env.SOLANA_RPC_HTTP || "https://api.mainnet-beta.solana.com";
+export const SOLANA_RPC_WS   = process.env.SOLANA_RPC_WS   || "wss://api.mainnet-beta.solana.com";
+
+export const WALLET_ADDRESS = "69x1WKAZFJzMgmZ79aVyQ2PshNqXfxjpEWAz32hjrpr3";

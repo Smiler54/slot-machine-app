@@ -1,12 +1,14 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import dynamic from "next/dynamic";
 import ResultToast from "./ResultToast";
 import LogoSection from "./LogoSection";
 import InfoSection from "./InfoSection";
 import BuySection from "./BuySection";
-import PixiSlotMachine from "./SlotSection/PixiSlotMachine";
+const PixiSlotMachine = dynamic(() => import("./SlotSection/PixiSlotMachine"), { ssr: false });
 import { StateMsg, BuyMsg, SellMsg, WinMsg } from "@/utils/types";
-import { STREAM_URL } from "@/utils/const";
+import { gameState } from "@/lib/gameState";
+import { STREAM_URL, WALLET_ADDRESS } from "@/utils/const";
 
 export default function SlotMachine() {
   const [state, setState] = useState<StateMsg["state"] | null>(null);
@@ -34,35 +36,28 @@ export default function SlotMachine() {
       }
     };
 
-    // === simulate local buy same as EventSource ===
-    window.addEventListener("local-buy", (e: any) => {
+    const handleLocalBuy = (e: any) => {
       const msg = e.detail;
       if (msg?.type === "buy") {
         setAlert(`💰 BUY: ${msg.buyer} • $${msg.amountUsd.toFixed(2)}`);
         resetAlert();
 
-        // Update state optimistically
         if (!lastBuyer.current) {
           lastBuyer.current = msg.buyer;
-  
-          console.log(msg);
-          setState((prev) => prev
-            ? {
-              ...prev,
-              marketCapUsd: prev.marketCapUsd + msg.amountUsd,
-              lastBuyer: {
-                wallet: msg.buyer,
-                amountUsd: msg.amountUsd,
-                ts: Date.now(),
-              },
-            }
-            : prev
-          );
+
+          gameState.recordBuy({
+            type: "buy",
+            buyer: WALLET_ADDRESS,
+            buyerName: "YOU",
+            amountUsd: msg.amountUsd,
+          });
         } else {
           lastBuyer.current = null;
         }
       }
-    });
+    };
+
+    window.addEventListener("local-buy", handleLocalBuy);
 
     function resetAlert(ms = 4000) {
       if (alertTimer.current) clearTimeout(alertTimer.current);
@@ -72,7 +67,7 @@ export default function SlotMachine() {
     return () => {
       es.close();
       if (alertTimer.current) clearTimeout(alertTimer.current);
-      window.removeEventListener("local-buy", () => { });
+      window.removeEventListener("local-buy", handleLocalBuy);
     };
   }, []);
 

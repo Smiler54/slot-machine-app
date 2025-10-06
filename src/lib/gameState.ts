@@ -1,5 +1,5 @@
 // lib/gameState.ts
-import { BUY_FEE_CREATOR, BUY_FEE_POOL, BUY_TIMEOUT, SELL_TIMEOUT, WIN_CHECK_TIME } from "@/utils/const";
+import { BUY_TIMEOUT, CREATOR_PAYOUT_PERCENT, SELL_TIMEOUT, WIN_CHECK_TIME, WINNER_PAYOUT_PERCENT } from "@/utils/const";
 import { bus } from "./bus";
 
 export type BuyEvent = {
@@ -21,6 +21,7 @@ export type WinEvent = {
   type: "win";
   winner: string;         // last buyer wallet
   payoutSuggestion: number; // 50% of creator wallet (manual payout by owner)
+  txSig?: string;
 };
 
 export type StateEvent = {
@@ -29,12 +30,9 @@ export type StateEvent = {
 };
 
 export type PublicState = {
-  // creator’s Pump.fun revenue wallet (display only)
   creatorWallet: string;
   creatorWalletName?: string;
-  // community / fees pool (display only)
   feesPoolWallet: string;
-  // tracked values
   feesPoolUsd: number;
   marketCapUsd: number;
   creatorWalletUsd: number;
@@ -44,9 +42,7 @@ export type PublicState = {
 };
 
 function adaptiveJackpotIntervalMs(marketCapUsd: number) {
-  // Base 30 min, scale up with market cap to make jackpots rarer as MC grows.
-  const base = WIN_CHECK_TIME; // 30 min
-  // Simple curve: +1 minute per $10k MC, capped at +120 min
+  const base = WIN_CHECK_TIME;
   const extra = Math.min(120, Math.floor(marketCapUsd / 10_000)) * 60_000;
   return base + extra;
 }
@@ -77,9 +73,9 @@ class GameState {
   /** Call when a buy happens */
   recordBuy(ev: BuyEvent) {
     // Update tracked numbers (these are approximations for UI; plug real values later)
-    this._state.feesPoolUsd += ev.amountUsd * BUY_FEE_POOL;
-    this._state.creatorWalletUsd += ev.amountUsd * BUY_FEE_CREATOR;
-    this._state.marketCapUsd += ev.amountUsd - (ev.amountUsd * (BUY_FEE_POOL + BUY_FEE_CREATOR));
+    this._state.marketCapUsd += ev.amountUsd;
+    this._state.creatorWalletUsd += ev.amountUsd * CREATOR_PAYOUT_PERCENT;
+    this._state.feesPoolUsd += ev.amountUsd * (1 - CREATOR_PAYOUT_PERCENT);
     this._state.lastBuyer = {
       wallet: ev.buyer,
       name: ev.buyerName,
@@ -87,9 +83,7 @@ class GameState {
       ts: Date.now(),
     };
 
-    // Recompute jackpot schedule as MC changed
     this.resetJackpotSchedule();
-
     bus.emit("event", ev);
     this.emitState();
   }
@@ -97,7 +91,17 @@ class GameState {
   /** Call when a sell happens */
   recordSell(ev: SellEvent) {
     // Visualize MC down for demo (replace with real pull)
-    this._state.marketCapUsd = Math.max(0, this._state.marketCapUsd - ev.amountUsd * 1.5);
+    this._state.marketCapUsd = Math.max(0, this._state.marketCapUsd - ev.amountUsd);
+    bus.emit("event", ev);
+    this.emitState();
+  }
+
+  recordWin(ev: WinEvent) {
+    // Simulate payout deduction (owner sends manually on-chain)
+    this._state.creatorWalletUsd = Math.max(
+      0,
+      this._state.creatorWalletUsd - ev.payoutSuggestion
+    );
     bus.emit("event", ev);
     this.emitState();
   }
@@ -123,15 +127,14 @@ class GameState {
   private runJackpot() {
     const last = this._state.lastBuyer;
     if (last) {
-      const payoutSuggestion = Math.max(0, this._state.creatorWalletUsd * 0.5);
+      const payoutSuggestion = Math.max(0, this._state.creatorWalletUsd * WINNER_PAYOUT_PERCENT);
       const win: WinEvent = {
         type: "win",
         winner: last.wallet,
         payoutSuggestion,
       };
-      // NOTE: Payout is MANUAL by the owner; we only notify the front-end.
+
       bus.emit("event", win);
-      // Show “money pour” by dropping creatorWalletUsd visually (demo only)
       this._state.creatorWalletUsd = Math.max(0, this._state.creatorWalletUsd - payoutSuggestion);
     }
     // Reschedule next jackpot with the current MC
@@ -140,7 +143,13 @@ class GameState {
   }
 }
 
-export const gameState = new GameState();
+let _GAME: GameState | null = null;
+export function getLocalGame(): GameState {
+  if (!_GAME) _GAME = new GameState();
+  return _GAME;
+}
+
+export const gameState = getLocalGame();
 
 /** MOCK MODE: generate random buys/sells so you can see the app move */
 if (process.env.USE_MOCK === "1") {

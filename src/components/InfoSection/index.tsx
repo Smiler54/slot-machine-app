@@ -1,5 +1,6 @@
 "use client";
-import PixiTokenFire from "./PixiTokenFire";
+import dynamic from "next/dynamic";
+const PixiTokenFire = dynamic(() => import("./PixiTokenFire"), { ssr: false });
 import { StateMsg } from "../../utils/types";
 
 export default function InfoSection({ state }: { state?: StateMsg["state"] | null }) {

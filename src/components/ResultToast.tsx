@@ -1,4 +1,6 @@
-export default function ResultToast({ text }: { text: string | null }) {
+import { memo } from "react";
+
+function ResultToastImpl({ text }: { text: string | null }) {
   if (!text) return null;
   return (
     <div className={`fixed top-2 right-2 z-50 px-4 py-2 rounded-3xl border shadow ${
@@ -12,3 +14,6 @@ export default function ResultToast({ text }: { text: string | null }) {
     </div>
   );
 }
+
+const ResultToast = memo(ResultToastImpl);
+export default ResultToast;
